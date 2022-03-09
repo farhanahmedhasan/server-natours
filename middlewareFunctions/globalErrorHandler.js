@@ -57,12 +57,21 @@ export default (err, req, res, next) => {
 
   let error = { ...err };
   if (process.env.NODE_ENV === "production") {
-    if (err.name === "CastError") error = handleCastErrorDB(error);
+    if (err.name === "CastError") {
+      error = handleCastErrorDB(error);
+      return sendErrorProd(error, res);
+    }
 
-    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (err.code === 11000) {
+      error = handleDuplicateFieldsDB(error);
+      return sendErrorProd(error, res);
+    }
 
-    if (err.name === "ValidationError") error = handleValidationErrorsDB(error);
+    if (err.name === "ValidationError") {
+      error = handleValidationErrorsDB(error);
+      return sendErrorProd(error, res);
+    }
 
-    sendErrorProd(error, res);
+    sendErrorProd(err, res);
   }
 };
