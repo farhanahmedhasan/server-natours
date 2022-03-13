@@ -17,7 +17,6 @@ const catchAsync = (fn) => {
 };
 
 export const getAllTour = catchAsync(async (req, res, next) => {
-  console.log(req.query);
   // BUILD QUERY----------------------------------
   // 1A) Basic Filtering
   const queryObj = { ...req.query };

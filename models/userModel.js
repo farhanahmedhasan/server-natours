@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
@@ -38,10 +40,23 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please confirm your password"],
   },
 
+  role: {
+    type: String,
+    enum: ["user", "guide", "lead-guide", "admin"],
+    default: "user",
+  },
+
   photo: {
     type: String,
     default: "avatar.png",
   },
+
+  passwordChangedAt: {
+    type: Date,
+  },
+
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // Encrypting The Password
@@ -55,9 +70,37 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Funtion to compare the password
+// Change passwordChangedAt when we update the password
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1500;
+  next();
+});
+
+// Funtion to compare the password (Availabale on all documents of this model )
 userSchema.methods.correctPassword = async function (candidatePauserPassword, userPassword) {
   return await bcrypt.compare(candidatePauserPassword, userPassword);
+};
+
+// Does the user changed his password after the token has been issued ?
+userSchema.methods.changedPasswordAfter = function (JWTTimestamps) {
+  if (this.passwordChangedAt) {
+    const formattedDate = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+
+    return JWTTimestamps < formattedDate;
+  }
+  return false;
+};
+
+//Generating a random token to reset password
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);

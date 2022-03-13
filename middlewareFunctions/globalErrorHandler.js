@@ -1,6 +1,6 @@
 import AppError from "../utils/appError.js";
 
-// Types of Error
+// Types of Error mongoose
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
@@ -18,6 +18,11 @@ const handleValidationErrorsDB = (err) => {
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, 400);
 };
+
+// JWT Errors
+const handleJWTError = () => new AppError(`Invalid token. Please login again. Pretty Please!!!`, 401);
+
+const handleJWTExpireError = () => new AppError(`Your login session has been expired. Please login again. Pretty Please!!!`, 401);
 
 // Error on production or dev
 const sendErrorDev = (err, res) => {
@@ -40,6 +45,7 @@ const sendErrorProd = (err, res) => {
 
     // Programming or other unknown error: Don't leak to the client
   } else {
+    console.log("💥 Error", err);
     res.status(500).json({
       status: "error",
       message: "Something went very wrong",
@@ -57,21 +63,17 @@ export default (err, req, res, next) => {
 
   let error = { ...err };
   if (process.env.NODE_ENV === "production") {
-    if (err.name === "CastError") {
-      error = handleCastErrorDB(error);
-      return sendErrorProd(error, res);
-    }
+    if (err.name === "CastError") error = handleCastErrorDB(error);
 
-    if (err.code === 11000) {
-      error = handleDuplicateFieldsDB(error);
-      return sendErrorProd(error, res);
-    }
+    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
 
-    if (err.name === "ValidationError") {
-      error = handleValidationErrorsDB(error);
-      return sendErrorProd(error, res);
-    }
+    if (err.name === "ValidationError") error = handleValidationErrorsDB(error);
 
-    sendErrorProd(err, res);
+    // JWT realated Errors
+    if (err.name === "JsonWebTokenError") error = handleJWTError();
+
+    if (err.name === "TokenExpiredError") error = handleJWTExpireError();
+
+    sendErrorProd(error, res);
   }
 };
