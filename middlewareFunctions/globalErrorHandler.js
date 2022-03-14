@@ -26,6 +26,8 @@ const handleJWTExpireError = () => new AppError(`Your login session has been exp
 
 // Error on production or dev
 const sendErrorDev = (err, res) => {
+  console.log(err);
+
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
