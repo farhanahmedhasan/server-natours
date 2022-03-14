@@ -104,7 +104,7 @@ export const restrictTo = (...roles) => {
   };
 };
 
-// Resetting The password functionality starts-----
+// Resetting The password functionality via email starts-----
 export const forgotPassword = catchAsync(async (req, res, next) => {
   if (!req.body.email) {
     return next(new AppError("Please Provide an Email to update your password", 401));
@@ -169,6 +169,30 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     message: "success",
+    token,
+  });
+});
+
+// Updating The password functionality starts (when user logged in) -----
+export const updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get the Current User from collection
+  const currentUser = await User.findById(req.user.id).select("+password");
+
+  // 2) Check if posted current password is correct
+  if (!(await currentUser.correctPassword(req.body.oldPassword, currentUser.password))) {
+    return next(new AppError("Your old password is wrong", 401));
+  }
+
+  // 3) If so , update password
+  currentUser.password = req.body.newPassword;
+  currentUser.passwordConfirm = req.body.passwordConfirm;
+  await currentUser.save();
+
+  // 4) Log the user in, send JWT
+  const token = signToken(currentUser._id);
+
+  return res.status(200).json({
+    status: "success",
     token,
   });
 });

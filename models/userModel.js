@@ -79,8 +79,8 @@ userSchema.pre("save", function (next) {
 });
 
 // Funtion to compare the password (Availabale on all documents of this model )
-userSchema.methods.correctPassword = async function (candidatePauserPassword, userPassword) {
-  return await bcrypt.compare(candidatePauserPassword, userPassword);
+userSchema.methods.correctPassword = async function (candidateUserPassword, userPassword) {
+  return await bcrypt.compare(candidateUserPassword, userPassword);
 };
 
 // Does the user changed his password after the token has been issued ?
