@@ -1,6 +1,9 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import hpp from "hpp";
 import morgan from "morgan";
 
 import tourRouter from "./routes/tourRoutes.js";
@@ -17,7 +20,7 @@ const app = express();
 // SET HTTP Headers
 app.use(helmet());
 
-// DEvelopment Logging
+// Development Logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -43,10 +46,20 @@ app.use("/api/v1/users/signup", limiterFunc(10, 25, "Too many account creation r
 // Body parser, Reading data from body to req.body
 app.use(express.json({ limit: "10kb" })); //Won't accept body that is in size more than 10kb
 
+// Data sanitization against NoSql injection -->This is the perfect place to use this middleware cause of the previous middleware
+app.use(mongoSanitize());
+
+// Data sanitization against XSS attacks
+app.use(xss());
+
+// Preventing HTTP Parameter Pollution
+app.use(hpp({ checkBody: false }));
+
+app.use("/api/v1/tours", hpp({ whitelist: ["duration", "maxGroupSize", "difficulty", "price", "ratingsAverage", "ratingsQuantity"] }));
+
 // Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-
   next();
 });
 

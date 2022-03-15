@@ -33,6 +33,7 @@ export const getAllTour = catchAsync(async (req, res, next) => {
   // 2) SORTING
   if (req.query.sort) {
     const sort = req.query.sort;
+
     const sortBy = sort.split(",").join(" ");
     query = query.sort(sortBy);
   } else {
