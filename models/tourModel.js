@@ -111,6 +111,7 @@ const tourSchema = new mongoose.Schema(
       description: String,
     },
 
+    // Embedding Different data set
     locations: [
       {
         type: {
@@ -125,6 +126,7 @@ const tourSchema = new mongoose.Schema(
       },
     ],
 
+    // Child Reference
     guides: [
       {
         type: mongoose.Schema.ObjectId,
@@ -138,6 +140,14 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// Virtual Populate
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
+});
+
+// Virtual getter
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });

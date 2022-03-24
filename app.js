@@ -8,6 +8,7 @@ import morgan from "morgan";
 
 import tourRouter from "./routes/tourRoutes.js";
 import userRouter from "./routes/userRoutes.js";
+import reviewRouter from "./routes/reviewRoutes.js";
 
 import AppError from "./utils/appError.js";
 
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 // Handle the routes that are not defined
 app.all("*", (req, res, next) => {
