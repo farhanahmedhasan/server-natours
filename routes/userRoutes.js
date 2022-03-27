@@ -1,6 +1,6 @@
 import express from "express";
 import { getAllUsers, createUser, getUser, updateUser, deleteUser, updateMe, deleteMe } from "../controllers/userController.js";
-import { protectRoute, signUp, login, forgotPassword, resetPassword, updatePassword } from "../controllers/authController.js";
+import { protectRoute, signUp, login, forgotPassword, resetPassword, updatePassword, restrictTo } from "../controllers/authController.js";
 
 const userRouter = express.Router();
 
@@ -14,10 +14,10 @@ userRouter.patch("/reset-password/:token", resetPassword);
 // Update Password When user is logged in
 userRouter.patch("/updateMyPassword", protectRoute, updatePassword);
 
-// The user itself (Authenticated user) can UPDATE his name and email
+// The user himself (Authenticated user) can UPDATE his name and email
 userRouter.patch("/updateMe", protectRoute, updateMe);
 
-// The user itself (Authenticated user) can DELETE his name and email
+// The user himself (Authenticated user) can DELETE his name and email
 userRouter.delete("/deleteMe", protectRoute, deleteMe);
 
 userRouter.route("/").get(getAllUsers).post(createUser);

@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-
 import Review from "../models/reviewModel.js";
 import AppError from "../utils/appError.js";
+
+import { deleteOne } from "./factoryController.js";
 
 const catchAsync = (fn) => {
   return (req, res, next) => {
@@ -54,3 +54,5 @@ export const getAllReview = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const deleteReview = deleteOne(Review);

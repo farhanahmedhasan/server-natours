@@ -1,6 +1,8 @@
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
 
+import { deleteOne } from "./factoryController.js";
+
 const catchAsync = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch((err) => next(err));
@@ -40,12 +42,7 @@ export const updateUser = async (req, res) => {
   });
 };
 
-export const deleteUser = async (req, res) => {
-  return res.status(400).json({
-    status: "fail ",
-    message: `Route Yet not defined`,
-  });
-};
+export const deleteUser = deleteOne(User);
 
 // The user itself (Authenticated user) can UPDATE his name and email
 export const updateMe = catchAsync(async (req, res, next) => {
