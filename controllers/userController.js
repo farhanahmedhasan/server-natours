@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
 
-import { deleteOne } from "./factoryController.js";
+import { deleteOne, updateOne, getOne, getAll } from "./factoryController.js";
 
 const catchAsync = (fn) => {
   return (req, res, next) => {
@@ -9,42 +9,23 @@ const catchAsync = (fn) => {
   };
 };
 
-export const getAllUsers = async (req, res) => {
-  const users = await User.find().where("active").ne(false);
-
-  return res.status(400).json({
-    status: "success ",
-    result: users.length,
-    data: {
-      users,
-    },
-  });
-};
-
 export const createUser = async (req, res) => {
   return res.status(400).json({
     status: "fail ",
-    message: `Route Yet not defined`,
+    message: `Route is not defined . Please use /signup instead`,
   });
 };
 
-export const getUser = async (req, res, next) => {
-  return res.status(400).json({
-    status: "fail ",
-    message: `Route Yet not defined`,
-  });
-};
+export const getAllUsers = getAll(User);
 
-export const updateUser = async (req, res) => {
-  res.status(500).json({
-    status: "error",
-    message: "This route is not yet defined",
-  });
-};
+export const getUser = getOne(User);
+
+// Do not update the password using this route
+export const updateUser = updateOne(User);
 
 export const deleteUser = deleteOne(User);
 
-// The user itself (Authenticated user) can UPDATE his name and email
+// The user himself (Authenticated user) can UPDATE his name and email
 export const updateMe = catchAsync(async (req, res, next) => {
   // 1) Error if a user tries to do update his password
   if (req.body.password || req.body.passwordConfirm) {
@@ -70,7 +51,7 @@ export const updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// The user itself (Authenticated user) can DELETE his name and email
+// The user himself (Authenticated user) can DELETE his name and email
 export const deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user._id, { active: false });
 

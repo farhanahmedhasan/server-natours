@@ -1,15 +1,9 @@
 import Review from "../models/reviewModel.js";
 import AppError from "../utils/appError.js";
 
-import { deleteOne } from "./factoryController.js";
+import { deleteOne, updateOne, createOne, getOne, getAll } from "./factoryController.js";
 
-const catchAsync = (fn) => {
-  return (req, res, next) => {
-    fn(req, res, next).catch((err) => next(err));
-  };
-};
-
-export const createReview = catchAsync(async (req, res, next) => {
+export const setTourUserIdAndCheckIfUserAlreadyReviewed = async (req, res, next) => {
   if (!req.body.tour) req.body.tour = req.params.tourId;
   const tourId = req.body.tour;
 
@@ -26,33 +20,17 @@ export const createReview = catchAsync(async (req, res, next) => {
   if (userAllReadyReviewdPost) {
     return next(new AppError("You already posted your review for this Tour", 409));
   }
+  next();
 
-  // 4) Create Review
+  // 4) Create Review on Next middleware
+};
 
-  const newReview = await Review.create(req.body);
+export const createReview = createOne(Review);
 
-  res.status(201).json({
-    status: "success",
-    data: {
-      review: newReview,
-    },
-  });
-});
+export const getAllReview = getAll(Review);
 
-export const getAllReview = catchAsync(async (req, res, next) => {
-  let filter = {};
+export const getReview = getOne(Review);
 
-  if (req.params.tourId) filter = { tour: req.params.tourId };
-
-  const reviews = await Review.find(filter).select("-__v");
-
-  res.status(200).json({
-    status: "success",
-    result: reviews.length,
-    data: {
-      reviews,
-    },
-  });
-});
+export const updateReview = updateOne(Review);
 
 export const deleteReview = deleteOne(Review);

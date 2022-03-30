@@ -1,8 +1,8 @@
 import Tour from "../models/tourModel.js";
-import AppError from "../utils/appError.js";
+// import AppError from "../utils/appError.js";
 // import ApiFeatures from '../utils/apiFeatures.js';
 
-import { deleteOne } from "./factoryController.js";
+import { deleteOne, updateOne, createOne, getOne, getAll } from "./factoryController.js";
 
 export const aliasTopTours = async (req, res, next) => {
   req.query.limit = "5";
@@ -17,115 +17,13 @@ const catchAsync = (fn) => {
   };
 };
 
-export const getAllTour = catchAsync(async (req, res, next) => {
-  // BUILD QUERY----------------------------------
-  // 1A) Basic Filtering
-  const queryObj = { ...req.query };
-  const excludedFields = ["page", "sort", "limit", "fields"];
+export const getAllTour = getAll(Tour);
 
-  excludedFields.forEach((el) => delete queryObj[el]);
+export const getTour = getOne(Tour, { path: "reviews" });
 
-  // // 1B) Advanced Filtering
-  let queryStr = JSON.stringify(queryObj);
-  queryStr = JSON.parse(queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`));
+export const createTour = createOne(Tour);
 
-  let query = Tour.find(queryStr);
-
-  // 2) SORTING
-  if (req.query.sort) {
-    const sort = req.query.sort;
-
-    const sortBy = sort.split(",").join(" ");
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort("-createdAt");
-  }
-
-  // 3) LIMITING FIELDS -- Select fields knows as query projection
-  if (req.query.fields) {
-    const fields = req.query.fields.split(",");
-    query = query.select(fields);
-  } else {
-    query = query.select("-__v");
-  }
-
-  // 4) PAGINAITON
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 6;
-  const skip = (page - 1) * limit;
-  const totalDocuments = await Tour.countDocuments({});
-
-  query = query.skip(skip).limit(limit);
-
-  if (req.query.page) {
-    const numTours = await Tour.estimatedDocumentCount();
-
-    if (skip >= numTours) throw new Error("This page does not exist");
-  }
-
-  // EXECUTE QUERY---------------------------------
-
-  const tours = await query;
-  // const features = await new ApiFeatures(Tour.find(), req.query).filter().sort().limitFields().paginate();
-  // const tours = await features.query;
-
-  // SEND RESPONSE---------------------------------
-  res.status(200).json({
-    status: "success",
-    results: tours.length,
-    totalDocuments,
-    totalPages: Math.ceil(totalDocuments / limit),
-    requestedAt: req.requestTime,
-    data: {
-      tours,
-    },
-  });
-});
-
-export const getTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findById(id).populate("reviews");
-
-  if (!tour) {
-    const err = new AppError(`Tour not found with that ID-${id}`, 404);
-    return next(err);
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour,
-    },
-  });
-});
-
-export const createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    status: "success",
-    data: {
-      newTour,
-    },
-  });
-});
-
-export const updateTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const updatedTour = await Tour.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-
-  if (!updatedTour) {
-    const err = new AppError(`Tour not found with that ID-${id}`, 404);
-    return next(err);
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      updatedTour,
-    },
-  });
-});
+export const updateTour = updateOne(Tour);
 
 export const deleteTour = deleteOne(Tour);
 
