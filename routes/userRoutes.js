@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers, createUser, getUser, updateUser, deleteUser, updateMe, deleteMe } from "../controllers/userController.js";
+import { getAllUsers, createUser, getUser, updateUser, deleteUser, updateMe, deleteMe, getMe } from "../controllers/userController.js";
 import { protectRoute, signUp, login, forgotPassword, resetPassword, updatePassword, restrictTo } from "../controllers/authController.js";
 
 const userRouter = express.Router();
@@ -20,6 +20,7 @@ userRouter.patch("/updateMe", protectRoute, updateMe);
 // The user himself (Authenticated user) can DELETE his name and email
 userRouter.delete("/deleteMe", protectRoute, deleteMe);
 
+userRouter.route("/me").get(protectRoute, getMe, getUser);
 userRouter.route("/").get(getAllUsers).post(createUser);
 userRouter.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 

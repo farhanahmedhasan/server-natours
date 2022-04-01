@@ -18,6 +18,11 @@ export const createUser = async (req, res) => {
 
 export const getAllUsers = getAll(User);
 
+export const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
 export const getUser = getOne(User);
 
 // Do not update the password using this route
