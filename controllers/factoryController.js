@@ -64,7 +64,7 @@ export const getOne = (Model, populateOptions) => {
     const doc = await query.select("-__v");
 
     if (!doc) {
-      const err = new AppError(`document not found with that ID-${id}`, 404);
+      const err = new AppError(`document not found with that ID-${req.params.id}`, 404);
       return next(err);
     }
 
