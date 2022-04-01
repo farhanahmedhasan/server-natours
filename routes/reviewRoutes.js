@@ -12,8 +12,15 @@ import { protectRoute, restrictTo } from "../controllers/authController.js";
 
 const reviewRouter = express.Router({ mergeParams: true });
 
-reviewRouter.route("/").get(getAllReview).post(protectRoute, restrictTo("user"), setTourUserIdAndCheckIfUserAlreadyReviewed, createReview);
+// Protect all the route after this
+reviewRouter.use(protectRoute);
 
-reviewRouter.route("/:id").get(getReview).patch(updateReview).delete(deleteReview);
+reviewRouter.route("/").get(getAllReview).post(restrictTo("user"), setTourUserIdAndCheckIfUserAlreadyReviewed, createReview);
+
+reviewRouter
+  .route("/:id")
+  .get(getReview)
+  .patch(restrictTo("user", "admin"), updateReview)
+  .delete(restrictTo("user", "admin"), deleteReview);
 
 export default reviewRouter;

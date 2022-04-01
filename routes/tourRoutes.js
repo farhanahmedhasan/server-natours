@@ -17,12 +17,18 @@ const tourRouter = express.Router();
 
 tourRouter.route("/top-5-cheap-tour").get(aliasTopTours, getAllTour);
 tourRouter.route("/tour-stats").get(getTourStats);
-tourRouter.route("/monthly-plan/:year").get(getMonthlyPlan);
 
-tourRouter.route("/").get(protectRoute, getAllTour).post(createTour);
+tourRouter.route("/monthly-plan/:year").get(protectRoute, restrictTo("admin", "lead-guide", "guide"), getMonthlyPlan);
 
-// 1) Only admin and lead-guide can delete a tour
-tourRouter.route("/:id").get(getTour).patch(updateTour).delete(protectRoute, restrictTo("admin", "lead-guide"), deleteTour);
+// Only authenticated admin and lead-guide can create a tour
+tourRouter.route("/").get(getAllTour).post(protectRoute, restrictTo("admin", "lead-guide"), createTour);
+
+// Only admin and lead-guide can delete and update a tour
+tourRouter
+  .route("/:id")
+  .get(getTour)
+  .patch(protectRoute, restrictTo("admin", "lead-guide"), updateTour)
+  .delete(protectRoute, restrictTo("admin", "lead-guide"), deleteTour);
 
 // Nested Route for tour --> review
 // tour/6asfw87/review if the route match it will use reviewrouter

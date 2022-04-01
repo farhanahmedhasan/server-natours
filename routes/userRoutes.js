@@ -11,16 +11,24 @@ userRouter.post("/login", login);
 userRouter.post("/forgot-password", forgotPassword);
 userRouter.patch("/reset-password/:token", resetPassword);
 
+// Protects all the route that comes after this
+userRouter.use(protectRoute);
+
 // Update Password When user is logged in
-userRouter.patch("/updateMyPassword", protectRoute, updatePassword);
+userRouter.patch("/updateMyPassword", updatePassword);
 
 // The user himself (Authenticated user) can UPDATE his name and email
-userRouter.patch("/updateMe", protectRoute, updateMe);
+userRouter.patch("/updateMe", updateMe);
 
 // The user himself (Authenticated user) can DELETE his name and email
-userRouter.delete("/deleteMe", protectRoute, deleteMe);
+userRouter.delete("/deleteMe", deleteMe);
 
-userRouter.route("/me").get(protectRoute, getMe, getUser);
+// This Route is for > user can see his information
+userRouter.route("/me").get(getMe, getUser);
+
+userRouter.use(restrictTo("admin"));
+// Only Admin can access these routes
+
 userRouter.route("/").get(getAllUsers).post(createUser);
 userRouter.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
 
