@@ -140,6 +140,11 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+//Compund Indexing on price and ratingsAverage for better query read performance (when filterd by price or ratingsAverage)
+//When creating compund Index we don't have to create indivitual for each field
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 // Virtual Populate
 tourSchema.virtual("reviews", {
   ref: "Review",
