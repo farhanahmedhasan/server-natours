@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  getTotalReviewCountForASingleTour,
   getAllReview,
   getReview,
   createReview,
@@ -15,7 +16,10 @@ const reviewRouter = express.Router({ mergeParams: true });
 // Protect all the route after this
 reviewRouter.use(protectRoute);
 
-reviewRouter.route("/").get(getAllReview).post(restrictTo("user"), setTourUserIdAndCheckIfUserAlreadyReviewed, createReview);
+reviewRouter
+  .route("/")
+  .get(getTotalReviewCountForASingleTour, getAllReview)
+  .post(restrictTo("user"), setTourUserIdAndCheckIfUserAlreadyReviewed, createReview);
 
 reviewRouter
   .route("/:id")

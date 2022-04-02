@@ -27,6 +27,11 @@ export const setTourUserIdAndCheckIfUserAlreadyReviewed = async (req, res, next)
 
 export const createReview = createOne(Review);
 
+export const getTotalReviewCountForASingleTour = async (req, res, next) => {
+  req.totalReviewOnATour = await Review.where({ tour: req.params.tourId }).countDocuments();
+  next();
+};
+
 export const getAllReview = getAll(Review);
 
 export const getReview = getOne(Review);

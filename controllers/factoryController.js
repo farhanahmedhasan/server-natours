@@ -120,7 +120,12 @@ export const getAll = (Model) => {
     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 6;
     const skip = (page - 1) * limit;
-    const totalDocuments = await Model.countDocuments({});
+    let totalDocuments = await Model.countDocuments({});
+
+    // Get all the review count for a single tour
+    if (req.totalReviewOnATour) {
+      totalDocuments = req.totalReviewOnATour;
+    }
 
     query = query.skip(skip).limit(limit);
 
