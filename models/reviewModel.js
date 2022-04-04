@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Tour from "./tourModel.js";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -36,6 +37,46 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// Statics Method to calulate avg rating and total reviews of a tour.
+// Which can be called directly on the model where instance method can be called on documents
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  // On a statics methods this points to the current model where in instance methos this points to the docs
+
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: "$tour",
+        nReview: { $sum: 1 },
+        avgRating: { $avg: "$rating" },
+      },
+    },
+  ]);
+
+  // console.log(stats);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nReview,
+      ratingsAverage: stats[0].avgRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 0,
+    });
+  }
+};
+
+// DOCUMENT Middleware
+// Post middleware doesn't get access to next function
+reviewSchema.post("save", function () {
+  //this points to the current review after save
+  this.constructor.calcAverageRatings(this.tour);
+});
+
 // QUERY Middlewares
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
@@ -43,6 +84,17 @@ reviewSchema.pre(/^find/, function (next) {
     select: "name photo",
   });
   next();
+});
+
+// findByIdAndUpdate (behind the scene) === findOneAndUpdate
+// findByIdDelete (behind the scene) === findOneAndDelete
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.findOne().clone();
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, function () {
+  this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model("Review", reviewSchema);

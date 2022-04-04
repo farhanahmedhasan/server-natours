@@ -42,9 +42,13 @@ export const updateOne = (Model) => {
   });
 };
 
-export const createOne = (Model) => {
+export const createOne = (Model, condition) => {
   return catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
+
+    // if (condition === "createReview") {
+    // Model.calcAverageRatings(doc.tour);  //You can do this to instead of calling this method on post review middleware in db
+    // }
 
     res.status(201).json({
       status: "success",
