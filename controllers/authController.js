@@ -73,7 +73,7 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// Protecting Routes.. User needs to be logged in to do (getAllTours,deleteTour)
+// Protecting Routes.. User needs to be logged in to do (deleteTour)
 export const protectRoute = catchAsync(async (req, res, next) => {
   // 1) If token exist on req.header get the token
   let token;

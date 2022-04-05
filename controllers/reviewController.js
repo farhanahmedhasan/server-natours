@@ -14,6 +14,7 @@ export const setTourUserIdAndCheckIfUserAlreadyReviewed = async (req, res, next)
   if (!req.body.user) req.body.user = req.user.id;
   const userId = req.body.user;
 
+  // Instead of writing compound index u can do this to prevent multiple reviews in a single tour
   const userAllReadyReviewdPost = reviews.find((review) => review.user.id === userId);
 
   // 3) Send Error if the user already posted a review for a tour

@@ -37,6 +37,10 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// Compound index to insure that a user cannot write 2 reviews on a single tour
+// Have Bug Isn't working for now
+// reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // Statics Method to calulate avg rating and total reviews of a tour.
 // Which can be called directly on the model where instance method can be called on documents
 reviewSchema.statics.calcAverageRatings = async function (tourId) {
