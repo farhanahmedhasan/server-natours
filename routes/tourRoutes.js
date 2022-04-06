@@ -6,6 +6,7 @@ import {
   getTourStats,
   getMonthlyPlan,
   getToursWithin,
+  getTourDistances,
   createTour,
   getTour,
   updateTour,
@@ -23,6 +24,9 @@ tourRouter.route("/monthly-plan/:year").get(protectRoute, restrictTo("admin", "l
 
 // Route for finding tours which is near by a user
 tourRouter.route("/tours-within/:distance/center/:latlong/unit/:unit").get(getToursWithin);
+
+// Route for calculating tours distances from user location
+tourRouter.route("/distance/:latlong/unit/:unit").get(getTourDistances);
 
 // Only authenticated admin and lead-guide can create a tour
 tourRouter.route("/").get(getAllTour).post(protectRoute, restrictTo("admin", "lead-guide"), createTour);

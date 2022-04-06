@@ -133,3 +133,35 @@ export const getToursWithin = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const getTourDistances = catchAsync(async (req, res, next) => {
+  const { latlong, unit } = req.params;
+  // 23.811373, 90.363383 --> [23.811373, 90.363383]
+  let [lat, lng] = latlong.split(",");
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    return next(new AppError(`Please provide your latitude or longitude in the format : lat,lng`, 400));
+  }
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        //geoNear has to be first stage in a aggregation to work
+        near: { type: "Point", coordinates: [lng * 1, lat * 1] },
+        distanceField: "distances",
+        distanceMultiplier: multiplier,
+      },
+    },
+
+    { $project: { name: 1, distances: 1 } },
+  ]);
+
+  res.status(200).json({
+    stats: "success",
+    data: {
+      distances,
+    },
+  });
+});
