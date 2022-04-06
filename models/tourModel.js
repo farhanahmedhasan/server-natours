@@ -145,6 +145,7 @@ const tourSchema = new mongoose.Schema(
 //When creating compund Index we don't have to create indivitual for each field
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: "2dsphere" }); //For speeding up geoQuery
 
 // Virtual Populate
 tourSchema.virtual("reviews", {

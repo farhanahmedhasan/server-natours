@@ -1,5 +1,5 @@
 import Tour from "../models/tourModel.js";
-// import AppError from "../utils/appError.js";
+import AppError from "../utils/appError.js";
 // import ApiFeatures from '../utils/apiFeatures.js';
 
 import { deleteOne, updateOne, createOne, getOne, getAll } from "./factoryController.js";
@@ -106,4 +106,30 @@ export const getMonthlyPlan = catchAsync(async (req, res, next) => {
   });
 
   console.log(year);
+});
+
+export const getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlong, unit } = req.params;
+  // 23.811373, 90.363383 --> [23.811373, 90.363383]
+  let [lat, lng] = latlong.split(",");
+
+  // MongoDb expects radians as radius to work
+  const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    return next(new AppError(`Please provide your latitude or longitude in the format : lat,lng`, 400));
+  }
+
+  const tours = await Tour.find({
+    // Have to give longitude first for mongoose
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  return res.status(200).json({
+    status: "Success",
+    result: tours.length,
+    data: {
+      tours,
+    },
+  });
 });
